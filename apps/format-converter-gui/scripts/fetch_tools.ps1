@@ -17,7 +17,7 @@ $ImageMagickVersion = "7.1.1-21"
 $PandocVersion = "3.1.11"
 
 # Create tools directory if it doesn't exist
-$FullToolsDir = Join-Path $PSScriptRoot ".." $ToolsDir
+$FullToolsDir = Join-Path (Join-Path $PSScriptRoot "..") $ToolsDir
 New-Item -ItemType Directory -Force -Path $FullToolsDir | Out-Null
 
 Write-Host "Tools directory: $FullToolsDir" -ForegroundColor Cyan
