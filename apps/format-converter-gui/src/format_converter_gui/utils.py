@@ -124,7 +124,7 @@ def parse_ffmpeg_progress(line: str) -> Optional[Tuple[str, str]]:
 
 def calculate_progress(out_time_microseconds: int, duration: Optional[float]) -> Optional[float]:
     """
-    Calculate conversion progress from FFmpeg out_time_ms value.
+    Calculate conversion progress from FFmpeg progress output.
     
     Args:
         out_time_microseconds: Time in microseconds (from FFmpeg's out_time_ms field,

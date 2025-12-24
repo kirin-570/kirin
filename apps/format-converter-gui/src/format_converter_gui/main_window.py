@@ -4,7 +4,6 @@ from PySide6.QtWidgets import (
     QMainWindow, QTabWidget, QMenuBar, QMenu, QMessageBox
 )
 from PySide6.QtGui import QAction
-from PySide6.QtCore import Qt
 
 from .converter_tab import ConverterTab
 from .converter_image import ImageConverter

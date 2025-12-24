@@ -173,7 +173,8 @@ class ConverterTab(QWidget):
         """Update button states."""
         has_input = bool(self.input_edit.text())
         has_output = bool(self.output_edit.text())
-        self.convert_btn.setEnabled(has_input and has_output and not self.worker)
+        is_converting = self.worker is not None and self.worker.isRunning()
+        self.convert_btn.setEnabled(has_input and has_output and not is_converting)
     
     def _start_conversion(self):
         """Start the conversion process."""
