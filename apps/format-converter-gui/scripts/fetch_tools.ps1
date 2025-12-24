@@ -8,16 +8,21 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Tool versions - update these to get newer versions
+$FFmpegVersion = "latest"  # Using latest essentials build
+$ImageMagickVersion = "7.1.1-21"
+$PandocVersion = "3.1.11"
+
 # Create tools directory if it doesn't exist
 $FullToolsDir = Join-Path $PSScriptRoot ".." $ToolsDir
 New-Item -ItemType Directory -Force -Path $FullToolsDir | Out-Null
 
 Write-Host "Tools directory: $FullToolsDir" -ForegroundColor Cyan
 
-# Define tool URLs and versions
+# Define tool URLs
 $FFmpegUrl = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
-$ImageMagickUrl = "https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-21-portable-Q16-x64.zip"
-$PandocUrl = "https://github.com/jgm/pandoc/releases/download/3.1.11/pandoc-3.1.11-windows-x86_64.zip"
+$ImageMagickUrl = "https://imagemagick.org/archive/binaries/ImageMagick-${ImageMagickVersion}-portable-Q16-x64.zip"
+$PandocUrl = "https://github.com/jgm/pandoc/releases/download/${PandocVersion}/pandoc-${PandocVersion}-windows-x86_64.zip"
 
 # Download and extract FFmpeg
 $FFmpegDir = Join-Path $FullToolsDir "ffmpeg"

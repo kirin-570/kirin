@@ -4,7 +4,7 @@ import os
 import sys
 import subprocess
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 
 
 def get_app_dir() -> Path:
@@ -104,3 +104,35 @@ def check_tools_status() -> Dict[str, Dict[str, Optional[str]]]:
     tools["Pandoc"]["version"] = get_tool_version(tools["Pandoc"]["path"], "--version")
     
     return tools
+
+
+def parse_ffmpeg_progress(line: str) -> Optional[Tuple[str, str]]:
+    """
+    Parse FFmpeg progress output line.
+    
+    Returns tuple of (key, value) if line is a progress line, None otherwise.
+    The key 'out_time_ms' contains time in microseconds despite the name.
+    """
+    line = line.strip()
+    if '=' in line:
+        key, _, value = line.partition('=')
+        return (key, value)
+    return None
+
+
+def calculate_progress(out_time_us: int, duration: Optional[float]) -> Optional[float]:
+    """
+    Calculate conversion progress from FFmpeg out_time_ms value.
+    
+    Args:
+        out_time_us: Time in microseconds (from out_time_ms field)
+        duration: Total duration in seconds (from ffprobe)
+    
+    Returns:
+        Progress value between 0.0 and 1.0, or None if duration is invalid
+    """
+    if duration is None or duration <= 0:
+        return None
+    
+    current_time = out_time_us / 1_000_000  # Convert microseconds to seconds
+    return current_time / duration

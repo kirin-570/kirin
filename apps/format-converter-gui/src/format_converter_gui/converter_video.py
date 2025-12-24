@@ -1,12 +1,11 @@
 """Video converter using FFmpeg."""
 
 import subprocess
-import re
 from pathlib import Path
 from typing import Optional, Callable
 
 from .converter_base import BaseConverter
-from .utils import get_ffmpeg_path, get_ffprobe_path
+from .utils import get_ffmpeg_path, get_ffprobe_path, parse_ffmpeg_progress, calculate_progress
 
 
 class VideoConverter(BaseConverter):
@@ -71,17 +70,15 @@ class VideoConverter(BaseConverter):
                 if self.cancelled:
                     break
                 
-                line = line.strip()
-                if line.startswith('out_time_ms='):
-                    # Parse time (out_time_ms is in microseconds despite the name)
+                parsed = parse_ffmpeg_progress(line)
+                if parsed and parsed[0] == 'out_time_ms':
                     try:
-                        time_us = int(line.split('=')[1])
-                        current_time = time_us / 1_000_000  # Convert to seconds
-                        if duration and duration > 0:
-                            progress = current_time / duration
+                        time_us = int(parsed[1])
+                        progress = calculate_progress(time_us, duration)
+                        if progress is not None:
                             self._progress(progress, progress_callback)
                             self._log(f"Progress: {progress*100:.1f}%", log_callback)
-                    except (ValueError, IndexError):
+                    except (ValueError, TypeError):
                         pass
             
             # Wait for completion
