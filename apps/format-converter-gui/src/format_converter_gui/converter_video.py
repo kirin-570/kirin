@@ -73,10 +73,10 @@ class VideoConverter(BaseConverter):
                 
                 line = line.strip()
                 if line.startswith('out_time_ms='):
-                    # Parse time in microseconds
+                    # Parse time (out_time_ms is in microseconds despite the name)
                     try:
-                        time_ms = int(line.split('=')[1])
-                        current_time = time_ms / 1_000_000  # Convert to seconds
+                        time_us = int(line.split('=')[1])
+                        current_time = time_us / 1_000_000  # Convert to seconds
                         if duration and duration > 0:
                             progress = current_time / duration
                             self._progress(progress, progress_callback)
