@@ -9,7 +9,10 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Tool versions - update these to get newer versions
-$FFmpegVersion = "latest"  # Using latest essentials build
+# Note: FFmpeg uses "latest" URL which always points to the current release build
+# This provides the latest stable version without needing to update the URL
+# If you need a specific version, use a direct download link instead
+$FFmpegVersion = "latest-release"  # Using latest essentials release build
 $ImageMagickVersion = "7.1.1-21"
 $PandocVersion = "3.1.11"
 

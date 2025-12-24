@@ -111,7 +111,9 @@ def parse_ffmpeg_progress(line: str) -> Optional[Tuple[str, str]]:
     Parse FFmpeg progress output line.
     
     Returns tuple of (key, value) if line is a progress line, None otherwise.
-    The key 'out_time_ms' contains time in microseconds despite the name.
+    
+    Note: FFmpeg's 'out_time_ms' field contains time in microseconds, 
+    not milliseconds as the name suggests.
     """
     line = line.strip()
     if '=' in line:
@@ -120,12 +122,13 @@ def parse_ffmpeg_progress(line: str) -> Optional[Tuple[str, str]]:
     return None
 
 
-def calculate_progress(out_time_us: int, duration: Optional[float]) -> Optional[float]:
+def calculate_progress(out_time_microseconds: int, duration: Optional[float]) -> Optional[float]:
     """
     Calculate conversion progress from FFmpeg out_time_ms value.
     
     Args:
-        out_time_us: Time in microseconds (from out_time_ms field)
+        out_time_microseconds: Time in microseconds (from FFmpeg's out_time_ms field,
+                              which despite its name contains microseconds, not milliseconds)
         duration: Total duration in seconds (from ffprobe)
     
     Returns:
@@ -134,5 +137,5 @@ def calculate_progress(out_time_us: int, duration: Optional[float]) -> Optional[
     if duration is None or duration <= 0:
         return None
     
-    current_time = out_time_us / 1_000_000  # Convert microseconds to seconds
+    current_time = out_time_microseconds / 1_000_000  # Convert microseconds to seconds
     return current_time / duration

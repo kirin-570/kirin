@@ -73,8 +73,8 @@ class VideoConverter(BaseConverter):
                 parsed = parse_ffmpeg_progress(line)
                 if parsed and parsed[0] == 'out_time_ms':
                     try:
-                        time_us = int(parsed[1])
-                        progress = calculate_progress(time_us, duration)
+                        time_microseconds = int(parsed[1])
+                        progress = calculate_progress(time_microseconds, duration)
                         if progress is not None:
                             self._progress(progress, progress_callback)
                             self._log(f"Progress: {progress*100:.1f}%", log_callback)
