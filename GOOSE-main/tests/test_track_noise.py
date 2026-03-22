@@ -119,5 +119,70 @@ class TestTrackWithNoise(unittest.TestCase):
             self.assertLessEqual(dist_m, max_offset_m * math.sqrt(2) + _FLOAT_TOLERANCE)
 
 
+class TestTrackWithRandomTime(unittest.TestCase):
+    """Test cases for Track.with_random_time()."""
+
+    BASE_POINTS = [
+        (32.07393038666775, 118.77614938560684),
+        (32.07411977632837, 118.77613914832789),
+    ]
+
+    def _make_track_local(self) -> Track:
+        return _make_track(self.BASE_POINTS)
+
+    def test_returns_new_track_instance(self):
+        """with_random_time() should return a different Track object."""
+        original = self._make_track_local()
+        result = original.with_random_time(480, 720)
+        self.assertIsNot(original, result)
+
+    def test_total_time_within_range(self):
+        """totalTime must be within [min_sec, max_sec]."""
+        original = self._make_track_local()
+        min_sec, max_sec = 300, 600
+        for _ in range(20):
+            result = original.with_random_time(min_sec, max_sec)
+            self.assertGreaterEqual(result.metadata.totalTime, min_sec)
+            self.assertLessEqual(result.metadata.totalTime, max_sec)
+
+    def test_formatted_time_matches_total_time(self):
+        """formattedTime must encode the same number of seconds as totalTime."""
+        original = self._make_track_local()
+        for _ in range(20):
+            result = original.with_random_time(300, 720)
+            total = result.metadata.totalTime
+            expected = f"{total // 60} 分 {total % 60} 秒"
+            self.assertEqual(result.metadata.formattedTime, expected)
+
+    def test_other_metadata_fields_preserved(self):
+        """All metadata fields other than totalTime/formattedTime must be unchanged."""
+        original = self._make_track_local()
+        result = original.with_random_time(480, 600)
+        self.assertEqual(result.metadata.totalDistance, original.metadata.totalDistance)
+        self.assertEqual(result.metadata.formattedDistance, original.metadata.formattedDistance)
+        self.assertEqual(result.metadata.sampleTimeInterval, original.metadata.sampleTimeInterval)
+        self.assertEqual(result.metadata.pointCount, original.metadata.pointCount)
+        self.assertEqual(result.metadata.createdAt, original.metadata.createdAt)
+
+    def test_track_points_preserved(self):
+        """Track points must be unchanged."""
+        original = self._make_track_local()
+        result = original.with_random_time(480, 600)
+        self.assertEqual(result.track, original.track)
+
+    def test_original_track_unmodified(self):
+        """with_random_time() must not mutate the original Track."""
+        original = self._make_track_local()
+        original_time = original.metadata.totalTime
+        original.with_random_time(480, 600)
+        self.assertEqual(original.metadata.totalTime, original_time)
+
+    def test_two_calls_may_produce_different_times(self):
+        """Repeated calls should occasionally produce different totalTime values."""
+        original = self._make_track_local()
+        times = {original.with_random_time(300, 720).metadata.totalTime for _ in range(50)}
+        self.assertGreater(len(times), 1, "Expected at least two distinct random times in 50 calls")
+
+
 if __name__ == "__main__":
     unittest.main()

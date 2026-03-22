@@ -90,7 +90,9 @@ class Service:
         open(user.finish_image, "rb").close()
 
         route = self._route_group_storage.load("route_group").get_route(user.route)
-        track = self._get_track(route.route_name, user.custom_track_path)
+        track = self._get_track(
+            route.route_name, user.custom_track_path, route.min_time * 60, route.max_time * 60
+        )
 
         async with self._construct_client(user, headers) as client:
             await client.check_tenant()
@@ -117,10 +119,18 @@ class Service:
             finish_record = record.get_finish_record(start_record, finish_image_url, record_id)
             await client.upload_finish_record(finish_record)
 
-    def _get_track(self, route_name: str, custom_track_path: str) -> Track:
+    def _get_track(
+        self,
+        route_name: str,
+        custom_track_path: str,
+        min_sec: Optional[int] = None,
+        max_sec: Optional[int] = None,
+    ) -> Track:
         if custom_track_path == "":
             logging.warning("未启用自定义轨迹, 将使用默认的轨迹文件")
             track = self._track_storage.load(route_name)
+            if min_sec is not None and max_sec is not None and min_sec <= max_sec:
+                track = track.with_random_time(min_sec, max_sec)
         else:
             track_path = Path(custom_track_path)
             track = self._track_storage.with_file_dir(track_path.parent).load(track_path.stem)

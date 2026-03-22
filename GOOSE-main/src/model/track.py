@@ -102,6 +102,33 @@ class Track(BaseModel):
         """
         return self.metadata.totalTime
 
+    def with_random_time(self, min_sec: int, max_sec: int) -> "Track":
+        """
+        生成具有随机化时间的新轨迹副本
+
+        在 [min_sec, max_sec] 范围内随机生成 totalTime，并生成对应的
+        formattedTime 字符串（格式如 "9 分 52 秒"）。
+
+        Args:
+            min_sec: 最小总时间（秒），必须 >= 0 且 <= max_sec
+            max_sec: 最大总时间（秒），必须 >= min_sec
+
+        Returns:
+            metadata 中 totalTime 和 formattedTime 随机化的新轨迹
+        """
+        if min_sec < 0 or max_sec < 0:
+            raise ValueError("min_sec and max_sec must be non-negative")
+        if min_sec > max_sec:
+            raise ValueError(f"min_sec ({min_sec}) must be <= max_sec ({max_sec})")
+        total_sec = random.randint(min_sec, max_sec)
+        minutes = total_sec // 60
+        seconds = total_sec % 60
+        formatted_time = f"{minutes} 分 {seconds} 秒"
+        new_metadata = self.metadata.model_copy(
+            update={"totalTime": total_sec, "formattedTime": formatted_time}
+        )
+        return Track(track=self.track, metadata=new_metadata)
+
     def with_noise(self, max_offset_m: float = 4.0) -> "Track":
         """
         生成带有随机噪声的新轨迹副本
