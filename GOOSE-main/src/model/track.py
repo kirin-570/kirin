@@ -5,7 +5,12 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from src.infrastructure.constants import EARTH_RADIUS_KM, METERS_PER_DEGREE_LATITUDE
+from src.infrastructure.constants import (
+    EARTH_RADIUS_KM,
+    METERS_PER_DEGREE_LATITUDE,
+    TRACK_MAX_DURATION_SEC,
+    TRACK_MIN_DURATION_SEC,
+)
 
 
 class TrackMetadata(BaseModel):
@@ -134,4 +139,9 @@ class Track(BaseModel):
                 )
             )
 
-        return Track(track=noisy_points, metadata=self.metadata)
+        total_time = random.randint(TRACK_MIN_DURATION_SEC, TRACK_MAX_DURATION_SEC)
+        formatted_time = f"{total_time // 60} 分 {total_time % 60} 秒"
+        noisy_metadata = self.metadata.model_copy(
+            update={"totalTime": total_time, "formattedTime": formatted_time}
+        )
+        return Track(track=noisy_points, metadata=noisy_metadata)

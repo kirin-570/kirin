@@ -5,6 +5,7 @@ import unittest
 from datetime import datetime
 from unittest.mock import patch
 
+from src.infrastructure.constants import TRACK_MAX_DURATION_SEC, TRACK_MIN_DURATION_SEC
 from src.model.track import Track, TrackMetadata, TrackPoint
 
 _FLOAT_TOLERANCE = 1e-9
@@ -56,10 +57,29 @@ class TestTrackWithNoise(unittest.TestCase):
             self.assertEqual(orig_pt.sortNum, noisy_pt.sortNum)
 
     def test_metadata_preserved(self):
-        """Metadata must be identical in the noisy copy."""
+        """Non-time metadata fields must be identical in the noisy copy."""
         original = _make_track(self.BASE_POINTS)
         noisy = original.with_noise()
-        self.assertEqual(original.metadata, noisy.metadata)
+        self.assertEqual(original.metadata.totalDistance, noisy.metadata.totalDistance)
+        self.assertEqual(original.metadata.formattedDistance, noisy.metadata.formattedDistance)
+        self.assertEqual(original.metadata.sampleTimeInterval, noisy.metadata.sampleTimeInterval)
+        self.assertEqual(original.metadata.pointCount, noisy.metadata.pointCount)
+        self.assertEqual(original.metadata.createdAt, noisy.metadata.createdAt)
+
+    def test_duration_within_range(self):
+        """with_noise() must produce a totalTime within the configured 9–11 minute range."""
+        original = _make_track(self.BASE_POINTS)
+        for _ in range(100):
+            noisy = original.with_noise()
+            self.assertGreaterEqual(noisy.metadata.totalTime, TRACK_MIN_DURATION_SEC)
+            self.assertLessEqual(noisy.metadata.totalTime, TRACK_MAX_DURATION_SEC)
+
+    def test_formatted_time_matches_total_time(self):
+        """formattedTime must reflect the randomised totalTime."""
+        original = _make_track(self.BASE_POINTS)
+        noisy = original.with_noise()
+        expected = f"{noisy.metadata.totalTime // 60} 分 {noisy.metadata.totalTime % 60} 秒"
+        self.assertEqual(noisy.metadata.formattedTime, expected)
 
     def test_offset_within_max_bounds(self):
         """Each noisy point must be within max_offset_m metres of the original."""

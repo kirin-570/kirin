@@ -44,6 +44,10 @@ API_ERROR_INVALID_TOKEN = 40005
 REQUEST_MIN_DELAY_SEC = 1.5  # 请求之间的最小延迟（秒）
 REQUEST_MAX_DELAY_SEC = 3.5  # 请求之间的最大延迟（秒）
 
+# Track Duration Configuration
+TRACK_MIN_DURATION_SEC = 540  # 随机运动时长最小值（秒），即 9 分钟
+TRACK_MAX_DURATION_SEC = 660  # 随机运动时长最大值（秒），即 11 分钟
+
 # Record Status
 RECORD_STATUS_FINISHED = 2  # 完成状态的记录状态码
 
