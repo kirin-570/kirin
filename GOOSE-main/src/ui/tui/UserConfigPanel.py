@@ -8,7 +8,6 @@ from src.model.user import User
 from src.service.main_service import Service
 
 from ...infrastructure.exceptions import AppError
-from .CustomTrack import CustomTrack
 from .DateTimeInput import DateTimeInput
 from .RouteSelector import RouteSelector
 
@@ -33,9 +32,6 @@ class UserConfigPanel(VerticalScroll):
         # 使用路线选择器组件
         yield RouteSelector(id="route")
 
-        # 使用自定义轨迹组件
-        yield CustomTrack(id="custom_track")
-
         yield Button("保存", id="save_user_config")
 
     def on_mount(self) -> None:
@@ -58,10 +54,6 @@ class UserConfigPanel(VerticalScroll):
             self.query_one("#start_image").value = user.start_image
             self.query_one("#finish_image").value = user.finish_image
             self.query_one("#route").value = user.route
-
-            # 使用自定义轨迹组件的set_config方法设置值
-            custom_track = self.query_one("#custom_track", CustomTrack)
-            custom_track.set_config(user.custom_track.enable, user.custom_track.file_path)
 
             logging.info("用户配置已加载")
             if hasattr(self.app, "notify"):
@@ -87,11 +79,6 @@ class UserConfigPanel(VerticalScroll):
             user.start_image = self.query_one("#start_image").value
             user.finish_image = self.query_one("#finish_image").value
             user.route = self.query_one("#route").value
-
-            # 从自定义轨迹组件获取配置
-            custom_track_config = self.query_one("#custom_track").get_config()
-            user.custom_track.enable = custom_track_config["enable"]
-            user.custom_track.file_path = custom_track_config["file_path"]
 
             # 使用本地service保存
             self._service.save_user(user)
