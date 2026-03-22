@@ -1,10 +1,11 @@
 import json
 import math
+import random
 from datetime import datetime
 
 from pydantic import BaseModel
 
-from src.infrastructure.constants import EARTH_RADIUS_KM
+from src.infrastructure.constants import EARTH_RADIUS_KM, METERS_PER_DEGREE_LATITUDE
 
 
 class TrackMetadata(BaseModel):
@@ -100,3 +101,37 @@ class Track(BaseModel):
             持续时间（秒）
         """
         return self.metadata.totalTime
+
+    def with_noise(self, max_offset_m: float = 4.0) -> "Track":
+        """
+        生成带有随机噪声的新轨迹副本
+
+        为每个轨迹点在纬度和经度方向分别添加 [-max_offset_m, max_offset_m]
+        范围内的随机偏移，使每次生成的路径独一无二。
+
+        Args:
+            max_offset_m: 每个方向的最大偏移量（米），默认4米
+
+        Returns:
+            带有随机偏移的新轨迹
+        """
+        # 1度纬度约等于111320米
+        lat_m_per_deg = METERS_PER_DEGREE_LATITUDE
+
+        noisy_points = []
+        for point in self.track:
+            # 经度的米/度比率取决于当前纬度
+            lng_m_per_deg = METERS_PER_DEGREE_LATITUDE * math.cos(math.radians(point.lat))
+
+            lat_offset = random.uniform(-max_offset_m, max_offset_m) / lat_m_per_deg
+            lng_offset = random.uniform(-max_offset_m, max_offset_m) / lng_m_per_deg
+
+            noisy_points.append(
+                TrackPoint(
+                    lat=point.lat + lat_offset,
+                    lng=point.lng + lng_offset,
+                    sortNum=point.sortNum,
+                )
+            )
+
+        return Track(track=noisy_points, metadata=self.metadata)

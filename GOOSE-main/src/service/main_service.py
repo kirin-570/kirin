@@ -124,7 +124,7 @@ class Service:
         else:
             track_path = Path(custom_track_path)
             track = self._track_storage.with_file_dir(track_path.parent).load(track_path.stem)
-        return track
+        return track.with_noise()
 
     @staticmethod
     def _construct_client(user: User, headers: Headers):
