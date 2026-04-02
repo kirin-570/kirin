@@ -60,11 +60,9 @@ class TestTrackWithNoise(unittest.TestCase):
         """Non-time metadata fields must be identical in the noisy copy."""
         original = _make_track(self.BASE_POINTS)
         noisy = original.with_noise()
-        self.assertEqual(original.metadata.totalDistance, noisy.metadata.totalDistance)
-        self.assertEqual(original.metadata.formattedDistance, noisy.metadata.formattedDistance)
-        self.assertEqual(original.metadata.sampleTimeInterval, noisy.metadata.sampleTimeInterval)
-        self.assertEqual(original.metadata.pointCount, noisy.metadata.pointCount)
-        self.assertEqual(original.metadata.createdAt, noisy.metadata.createdAt)
+        original_meta = original.metadata.model_dump(exclude={"totalTime", "formattedTime"})
+        noisy_meta = noisy.metadata.model_dump(exclude={"totalTime", "formattedTime"})
+        self.assertEqual(original_meta, noisy_meta)
 
     def test_duration_within_range(self):
         """with_noise() must produce a totalTime within the configured 9–11 minute range."""
